@@ -4,15 +4,7 @@ import cv2
 from pathlib import Path
 from sklearn.model_selection import train_test_split
 import shutil
-
-
-
-OUTPUT_DIR = "task1/birdsai_yolo"
-
-IMG_TRAIN = os.path.join(OUTPUT_DIR, "images/train")
-IMG_VAL   = os.path.join(OUTPUT_DIR, "images/val")
-LBL_TRAIN = os.path.join(OUTPUT_DIR, "labels/train")
-LBL_VAL   = os.path.join(OUTPUT_DIR, "labels/val")
+from config import *
 
 
 def map_class(label):
@@ -58,6 +50,8 @@ def process_video(video_id, video_path, csv_path, split="train"):
 
         out_img_path = os.path.join(img_out_dir, img_name)
         out_lbl_path = os.path.join(lbl_out_dir, img_name.replace(".jpg", ".txt"))
+        if os.path.exists(out_lbl_path):
+            os.remove(out_lbl_path)
 
         if not os.path.exists(out_img_path):
             cv2.imwrite(out_img_path, img)
@@ -83,7 +77,9 @@ def prepare_dataset(root="TrainReal"):
     # Ensure clean output directory to avoid stale data
     if os.path.exists(OUTPUT_DIR):
         shutil.rmtree(OUTPUT_DIR)
+
     for p in [IMG_TRAIN, IMG_VAL, LBL_TRAIN, LBL_VAL]:
+    # for p in [LBL_TRAIN, LBL_VAL]:
         os.makedirs(p, exist_ok=True)
 
     videos = os.listdir(img_dir)
