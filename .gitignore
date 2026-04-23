@@ -1,0 +1,6 @@
+/venv*
+Assignment4.pdf
+Dataset.zip
+*__pycache__*
+/Dataset*
+/birdsai_yolo*
