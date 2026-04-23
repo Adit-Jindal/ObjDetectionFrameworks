@@ -1,6 +1,6 @@
-path: ./task1
+path: ./task1/birdsai_yolo
 
-train: ../Dataset/TrainReal
+train: images/train
 val: images/val
 
 names:

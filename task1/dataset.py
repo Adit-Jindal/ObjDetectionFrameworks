@@ -7,7 +7,7 @@ import shutil
 
 
 
-OUTPUT_DIR = "birdsai_yolo"
+OUTPUT_DIR = "task1/birdsai_yolo"
 
 IMG_TRAIN = os.path.join(OUTPUT_DIR, "images/train")
 IMG_VAL   = os.path.join(OUTPUT_DIR, "images/val")
@@ -76,7 +76,7 @@ def process_video(video_id, video_path, csv_path, split="train"):
             f.write(f"{cls} {xc} {yc} {bw} {bh}\n")
 
 
-def prepare_dataset(root="trainReal"):
+def prepare_dataset(root="TrainReal"):
     ann_dir = os.path.join(root, "annotations")
     img_dir = os.path.join(root, "images")
 
