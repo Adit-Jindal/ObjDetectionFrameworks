@@ -16,7 +16,6 @@ def map_class(label):
 
 
 
-
 def convert_bbox(x, y, w, h, img_w, img_h):
     xc = (x + w / 2) / img_w
     yc = (y + h / 2) / img_h
@@ -31,8 +30,8 @@ def process_video(video_id, video_path, csv_path, split="train"):
 
     images_root = video_path
 
-    img_out_dir = IMG_TRAIN if split == "train" else IMG_VAL
-    lbl_out_dir = LBL_TRAIN if split == "train" else LBL_VAL
+    img_out_dir = IMG_TRAIN if split == "train" else IMG_TEST if split == "test" else IMG_VAL
+    lbl_out_dir = LBL_TRAIN if split == "train" else LBL_TEST if split == "test" else LBL_VAL
 
     for _, row in df.iterrows():
 
@@ -50,8 +49,6 @@ def process_video(video_id, video_path, csv_path, split="train"):
 
         out_img_path = os.path.join(img_out_dir, img_name)
         out_lbl_path = os.path.join(lbl_out_dir, img_name.replace(".jpg", ".txt"))
-        if os.path.exists(out_lbl_path):
-            os.remove(out_lbl_path)
 
         if not os.path.exists(out_img_path):
             cv2.imwrite(out_img_path, img)
@@ -70,17 +67,17 @@ def process_video(video_id, video_path, csv_path, split="train"):
             f.write(f"{cls} {xc} {yc} {bw} {bh}\n")
 
 
-def prepare_dataset(root="TrainReal"):
+
+def prepare_dataset(root="TrainReal", mode="train"):
     ann_dir = os.path.join(root, "annotations")
     img_dir = os.path.join(root, "images")
 
-    # Ensure clean output directory to avoid stale data
-    if os.path.exists(OUTPUT_DIR):
-        shutil.rmtree(OUTPUT_DIR)
+    dirs = [IMG_TRAIN, IMG_VAL, LBL_TRAIN, LBL_VAL] if mode == "train" else [IMG_TEST, LBL_TEST]
 
-    for p in [IMG_TRAIN, IMG_VAL, LBL_TRAIN, LBL_VAL]:
-    # for p in [LBL_TRAIN, LBL_VAL]:
-        os.makedirs(p, exist_ok=True)
+    for p in dirs:
+        if os.path.exists(p):
+            shutil.rmtree(p)
+        os.makedirs(p)
 
     videos = os.listdir(img_dir)
 
@@ -94,6 +91,6 @@ def prepare_dataset(root="TrainReal"):
         # simple split (you can improve later)
         split = "train" if hash(v) % 5 != 0 else "val"
 
-        process_video(v, video_path, csv_path, split)
+        process_video(v, video_path, csv_path, split if mode == "train" else mode)
 
     print("Dataset conversion complete → YOLO format ready.")

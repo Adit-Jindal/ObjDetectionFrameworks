@@ -2,6 +2,7 @@ path: ./task1/birdsai_yolo
 
 train: images/train
 val: images/val
+test: images/test
 
 names:
   0: Animal
