@@ -1,13 +1,13 @@
 import os
-import pandas as pd
-import torch
 import cv2
+import torch
+import pandas as pd
+from collections import defaultdict
 from torch.utils.data import Dataset
 
 class BirdsAIDataset(Dataset):
-    def __init__(self, root, split="train"):
+    def __init__(self, root):
         self.root = root
-        self.split = split
 
         self.img_dir = os.path.join(root, "images")
         self.ann_dir = os.path.join(root, "annotations")
@@ -16,6 +16,8 @@ class BirdsAIDataset(Dataset):
         self._build_index()
 
     def _build_index(self):
+        self.image_data = defaultdict(list)
+
         videos = os.listdir(self.img_dir)
 
         for v in videos:
@@ -35,30 +37,39 @@ class BirdsAIDataset(Dataset):
                 if not os.path.exists(img_path):
                     continue
 
-                self.samples.append((img_path, row))
+                self.image_data[img_path].append(row)
+
+        self.samples = list(self.image_data.keys())
 
     def __len__(self):
         return len(self.samples)
 
     def __getitem__(self, idx):
-        img_path, row = self.samples[idx]
+        img_path = self.samples[idx]
+        rows = self.image_data[img_path]
 
         img = cv2.imread(img_path)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        h, w = img.shape[:2]
 
-        x, y, bw, bh = row[2], row[3], row[4], row[5]
+        boxes = []
+        labels = []
 
-        x1 = x
-        y1 = y
-        x2 = x + bw
-        y2 = y + bh
+        for row in rows:
+            x, y, bw, bh = row[2], row[3], row[4], row[5]
 
-        label = 1 if int(row[7]) == 1 else 0
+            x1 = x
+            y1 = y
+            x2 = x + bw
+            y2 = y + bh
+
+            label = 1 if int(row[7]) == 1 else 0
+
+            boxes.append([x1, y1, x2, y2])
+            labels.append(label + 1)
 
         target = {
-            "boxes": torch.tensor([[x1, y1, x2, y2]], dtype=torch.float32),
-            "labels": torch.tensor([label + 1])  # +1 for background
+            "boxes": torch.tensor(boxes, dtype=torch.float32),
+            "labels": torch.tensor(labels, dtype=torch.int64)
         }
 
         img = torch.tensor(img / 255., dtype=torch.float32).permute(2, 0, 1)

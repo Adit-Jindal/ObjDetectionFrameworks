@@ -3,6 +3,7 @@ from ultralytics import YOLO
 from dataset import prepare_dataset
 from eval_utils import run_evaluation
 from config import *
+import torch
 
 
 
@@ -18,7 +19,7 @@ def train(data_dir):
         batch=16,
         project="task1/runs/detect",
         name="yolo_birdsai",
-        device="mps",
+        device="mps" if torch.backends.mps.is_available() else "cpu" if torch.cuda.is_available() else "cpu",
         workers=2,
         cache=False,
     )
