@@ -16,10 +16,10 @@ def train(data_dir):
         data="task1/birdsai.yaml",
         epochs=25,
         imgsz=640,
-        batch=16,
+        batch=8,
         project="task1/runs/detect",
         name="yolo_birdsai",
-        device="mps" if torch.backends.mps.is_available() else "cpu" if torch.cuda.is_available() else "cpu",
+        device="mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu",
         workers=2,
         cache=False,
     )

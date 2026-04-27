@@ -20,7 +20,7 @@ def run_evaluation(data_dir="Dataset/TestReal"):
     
     if os.path.exists(PRED_SAVE_DIR):
         shutil.rmtree(PRED_SAVE_DIR)
-    os.makedirs(PRED_SAVE_DIR, exist_ok=True)
+    os.makedirs(PRED_SAVE_DIR)
 
     print("Running inference on test set...")
     results = model.predict(
@@ -28,14 +28,15 @@ def run_evaluation(data_dir="Dataset/TestReal"):
         conf=0.25,
         save=True,
         save_txt=True,
-        project=PRED_SAVE_DIR,
+        project=os.path.join(os.getcwd(),PRED_SAVE_DIR),
         name="preds",
         verbose=False,
     )
 
     save_dir = results[0].save_dir
+    print(save_dir)
 
-    pred_labels_root = os.path.join(save_dir, "labels")
+    pred_labels_root = os.path.join(save_dir, "../labels")
     annotations_dir = os.path.join(data_dir, "annotations")
 
     print("Computing video scales...")
@@ -47,7 +48,7 @@ def run_evaluation(data_dir="Dataset/TestReal"):
     print("Computing mAP table...")
     table = compute_map(stats)
 
-    print_table(table)
+    print_table(table, save_dir)
 
     print("Showing qualitative results...")
     show_samples(save_dir, n=5)
@@ -223,16 +224,18 @@ def compute_map(stats):
 
 # ===================== PRINT =====================
 
-def print_table(table):
-    print("\n=== mAP Table ===")
+def print_table(table, save_dir):
+    sum_path = os.path.join(save_dir, "../summary.txt")
+    with open(sum_path) as f:
+        f.write("\n=== mAP Table ===")
 
-    rows = [
-        "SA","MA","LA","Animals",
-        "SH","MH","LH","Humans","Overall"
-    ]
+        rows = [
+            "SA","MA","LA","Animals",
+            "SH","MH","LH","Humans","Overall"
+        ]
 
-    for r in rows:
-        print(f"{r}: {table.get(r, 0):.4f}")
+        for r in rows:
+            f.write(f"{r}: {table.get(r, 0):.4f}")
 
 # ===================== VISUAL =====================
 

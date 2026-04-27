@@ -60,9 +60,13 @@ def train(data_dir, mode):
     for epoch in range(4):
         model.train()
         total_loss = 0
-        i = 0
+        print(len(loader))
+        i = epoch
 
         for batch in loader:
+            if i%2:
+                i += 1
+                continue
             pixel_values = batch["pixel_values"].to(device)
             pixel_mask = batch["pixel_mask"].to(device)
             labels = [{k: v.to(device) for k, v in t.items()} for t in batch["labels"]]
